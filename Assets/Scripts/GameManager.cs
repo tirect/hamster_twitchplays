@@ -38,12 +38,11 @@ public class GameManager : MonoBehaviour
 		};
 
 		var player_coord = player.x * _fieldWidth + player.y;
-		field[player_coord] = player;
 
 		var go = new GameObject("Non Heroes");
 		int x = 0;
 		int y = 0;
-		for(var i = 0; i < 8; ++i)
+		for(var i = 0; i < 9; ++i)
 		{
 			var coord = x * _fieldWidth + y;
 			var pos = new Vector2(x * 3 - 3, y * 3 - 3);
@@ -60,16 +59,6 @@ public class GameManager : MonoBehaviour
 			{
 				y++;
 				x = 0;
-			}
-			coord = x * _fieldWidth + y;
-			if (coord == player_coord)
-			{
-				x++;
-				if (x >= _fieldWidth)
-				{
-					y++;
-					x = 0;
-				}
 			}
 		}
 	}
@@ -112,17 +101,11 @@ public class GameManager : MonoBehaviour
 
 					if ((x_change == 0 && y_change == 1) || (x_change == 1 && y_change == 0))
 					{
-						var player_idx = player.x * _fieldWidth + player.y;
 						var card_idx = cardInfo.x * _fieldWidth + cardInfo.y;
 
-						var playerPrevPos = player.go.transform.position;
-						player.go.transform.position = field[card_idx].go.transform.position;
-						field[card_idx].go.transform.position = playerPrevPos;
-
-						field[player_idx].go = field[card_idx].go;
-						field[card_idx].go = player.go;
-
-						player = field[card_idx];
+						player.go.transform.position = field[card_idx].go.transform.position - Vector3.forward;
+						player.x = cardInfo.x;
+						player.y = cardInfo.y;
 					}
 				}
 			}
