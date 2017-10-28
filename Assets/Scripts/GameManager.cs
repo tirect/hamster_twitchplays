@@ -1,114 +1,71 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
-	[SerializeField] private Sprite _hero;
-	[SerializeField] private Sprite _nonHero;
+    [SerializeField] private Transform _coreParent;
+    [SerializeField] private Vector2 _coreStartPos;
+    [SerializeField] private Transform _corePrefab;
+    [Space]
+    [SerializeField] private Transform _grassParent;
+    
+    private Sprite[] _coreSprites;
+    private Sprite[] _grassSprites;
+    private Sprite[] _grassSprites1;
+    private Sprite[] _grassSprites2;
+    private Sprite[] _grassSprites3;
+    private const int _offset = 64;
 
-	[Serializable]
-	private struct CardInfo
-	{
-		public GameObject go;
-		public int x;
-		public int y;
-		public Rect bounds;
-	}
+    private void Awake()
+    {
+        _coreSprites = Resources.LoadAll<Sprite>("terra_tiled_core");
+        _grassSprites3 = Resources.LoadAll<Sprite>("terra_tiled_grass_01");
+        _grassSprites2 = Resources.LoadAll<Sprite>("terra_tiled_grass_02");
+        _grassSprites1 = Resources.LoadAll<Sprite>("terra_tiled_grass_03");
+        _grassSprites = Resources.LoadAll<Sprite>("terra_tiled_grass_04");
+    }
 
-	[SerializeField] private CardInfo[] field;
-	private CardInfo player;
+    private void Start()
+    {
+        for (var i = 0; i < 12; ++i)
+        {
+            var localOffset = Vector2.right * _offset * i;
+            var pos = _coreStartPos + localOffset;
+            var pos2 = _coreStartPos + Vector2.down * _offset * 11 + localOffset;
+            var text = i == 0 || i == 11 ? "" : i.ToString();
+            CreateImage(_coreParent, pos, _coreSprites[i], text);
+            CreateImage(_coreParent, pos2, _coreSprites[i + 12 * 11], text);
+            if (i < 11)
+            {
+                localOffset = Vector2.down * _offset * (i + 1);
+                pos = _coreStartPos + localOffset;
+                pos2 = _coreStartPos + Vector2.right * _offset * 11 + localOffset;
+                CreateImage(_coreParent, pos, _coreSprites[12 + i * 12], "");
+                CreateImage(_coreParent, pos2, _coreSprites[23 + i * 12], "");
+            }
+        }
 
-	private int _fieldWidth = 3;
+        var grassStartPos = _coreStartPos + Vector2.down * _offset + Vector2.right * _offset;
+        var grassStartIdx = 13;
+        for (var i = 0; i < 10; ++i)
+        {
+            for (var j = 0; j < 10; ++j)
+            {
+                var pos = grassStartPos + Vector2.right * _offset * i + Vector2.down * _offset * j;
+                var sprite = _grassSprites[grassStartIdx + i + j * 12];
+                CreateImage(_grassParent, pos, sprite, "");
+            }
+        }
+    }
 
-	private void Awake()
-	{
-		field = new CardInfo[_fieldWidth * _fieldWidth];
-	}
+    private Transform CreateImage(Transform parent, Vector2 pos, Sprite sprite, string text)
+    {
+        var g = Instantiate(_corePrefab, parent);
+        g.localPosition = pos;
+        g.GetComponent<Image>().sprite = sprite;
+        g.GetComponentInChildren<Text>().text = text;
 
-	// Use this for initialization
-	private void Start ()
-	{
-		var playerPos = new Vector2(0, 0);
-		player = new CardInfo
-		{
-			go = CreateGameObjectWithSprite("Hero", playerPos, _hero),
-			x = 1,
-			y = 1,
-			bounds = new Rect(playerPos - new Vector2(1.5f, 1.5f), new Vector2(3, 3))
-		};
-
-		var player_coord = player.x * _fieldWidth + player.y;
-
-		var go = new GameObject("Non Heroes");
-		int x = 0;
-		int y = 0;
-		for(var i = 0; i < 9; ++i)
-		{
-			var coord = x * _fieldWidth + y;
-			var pos = new Vector2(x * 3 - 3, y * 3 - 3);
-			field[coord] = new CardInfo
-			{
-				go = CreateGameObjectWithSprite("nonHero", pos, _nonHero, go.transform),
-				x = x,
-				y = y,
-				bounds = new Rect(pos - new Vector2(1.5f, 1.5f), new Vector2(3, 3))
-			};
-
-			x++;
-			if (x >= _fieldWidth)
-			{
-				y++;
-				x = 0;
-			}
-		}
-	}
-
-	private static GameObject CreateGameObjectWithSprite(string name, Vector2 pos, Sprite sprite, Transform parent = null)
-	{
-		var go = new GameObject(name);
-		go.transform.position = pos;
-		go.transform.parent = parent;
-		var s = go.AddComponent<SpriteRenderer>();
-		s.sprite = sprite;
-
-		return go;
-	}
-
-	private void Update()
-	{
-		foreach (var cardInfo in field)
-		{
-			var bounds_point1 = new Vector3(cardInfo.bounds.xMin, cardInfo.bounds.yMin, 0);
-			var bounds_point2 = new Vector3(cardInfo.bounds.xMax, cardInfo.bounds.yMax, 0);
-			var bounds_point3 = new Vector3(cardInfo.bounds.xMin, cardInfo.bounds.yMax, 0);
-			var bounds_point4 = new Vector3(cardInfo.bounds.xMax, cardInfo.bounds.yMin, 0);
-
-			Debug.DrawLine(bounds_point1, bounds_point3, Color.green);
-			Debug.DrawLine(bounds_point3, bounds_point2, Color.green);
-			Debug.DrawLine(bounds_point2, bounds_point4, Color.green);
-			Debug.DrawLine(bounds_point1, bounds_point4, Color.green);
-		}
-
-		if (Input.GetMouseButtonUp(0))
-		{
-			var mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-			foreach (var cardInfo in field)
-			{
-				if (cardInfo.bounds.Contains(mousePos))
-				{
-					var x_change = Math.Abs(player.x - cardInfo.x);
-					var y_change = Math.Abs(player.y - cardInfo.y);
-
-					if ((x_change == 0 && y_change == 1) || (x_change == 1 && y_change == 0))
-					{
-						var card_idx = cardInfo.x * _fieldWidth + cardInfo.y;
-
-						player.go.transform.position = field[card_idx].go.transform.position - Vector3.forward;
-						player.x = cardInfo.x;
-						player.y = cardInfo.y;
-					}
-				}
-			}
-		}
-	}
+        return g;
+    }
 }
