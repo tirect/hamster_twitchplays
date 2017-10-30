@@ -1,14 +1,22 @@
-﻿using System;
+﻿using System.Linq;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
-    [SerializeField] private Transform _coreParent;
-    [SerializeField] private Vector2 _coreStartPos;
+	[SerializeField] private Vector2 _zeroPos;
+	[Space]
+	[SerializeField] private Transform _coreParent;
     [SerializeField] private Transform _corePrefab;
     [Space]
     [SerializeField] private Transform _grassParent;
+
+	[Space] [SerializeField] private string[] _horizontalLetters;
+
+	[Space]
+	[SerializeField] private Transform _playerPrefab;
+	[SerializeField] private Transform _playersParent;
     
     private Sprite[] _coreSprites;
     private Sprite[] _grassSprites;
@@ -17,47 +25,65 @@ public class GameManager : MonoBehaviour
     private Sprite[] _grassSprites3;
     private const int _offset = 64;
 
-    private void Awake()
-    {
-        _coreSprites = Resources.LoadAll<Sprite>("terra_tiled_core");
-        _grassSprites3 = Resources.LoadAll<Sprite>("terra_tiled_grass_01");
-        _grassSprites2 = Resources.LoadAll<Sprite>("terra_tiled_grass_02");
-        _grassSprites1 = Resources.LoadAll<Sprite>("terra_tiled_grass_03");
-        _grassSprites = Resources.LoadAll<Sprite>("terra_tiled_grass_04");
-    }
+	private List<PlayerController> _players;
+	private int[] _playerStartPositions;
+
+	private void Awake()
+	{
+		_coreSprites = Resources.LoadAll<Sprite>("terra_tiled_core");
+		_grassSprites3 = Resources.LoadAll<Sprite>("terra_tiled_grass_01");
+		_grassSprites2 = Resources.LoadAll<Sprite>("terra_tiled_grass_02");
+		_grassSprites1 = Resources.LoadAll<Sprite>("terra_tiled_grass_03");
+		_grassSprites = Resources.LoadAll<Sprite>("terra_tiled_grass_04");
+		_playerStartPositions = new int[40];
+		for (var i = 0; i < 10; ++i)
+		{
+			_playerStartPositions[i] = i+1;
+			_playerStartPositions[i + 10] = i + 1 + 12 * 11;
+			_playerStartPositions[i + 20] = 12 + i * 12;
+			_playerStartPositions[i + 30] = 23 + i * 12;
+		}
+		_players = new List<PlayerController>();
+	}
 
     private void Start()
     {
         for (var i = 0; i < 12; ++i)
         {
-            var localOffset = Vector2.right * _offset * i;
-            var pos = _coreStartPos + localOffset;
-            var pos2 = _coreStartPos + Vector2.down * _offset * 11 + localOffset;
-            var text = i == 0 || i == 11 ? "" : i.ToString();
+            var pos = GetPositionFromIdx(i);
+            var pos2 = GetPositionFromIdx(i+12*11);
+            var text = i == 0 || i == 11 ? "" : _horizontalLetters[i-1];
             CreateImage(_coreParent, pos, _coreSprites[i], text);
             CreateImage(_coreParent, pos2, _coreSprites[i + 12 * 11], text);
-            if (i < 11)
+            if (i < 10)
             {
-                localOffset = Vector2.down * _offset * (i + 1);
-                pos = _coreStartPos + localOffset;
-                pos2 = _coreStartPos + Vector2.right * _offset * 11 + localOffset;
-                CreateImage(_coreParent, pos, _coreSprites[12 + i * 12], "");
-                CreateImage(_coreParent, pos2, _coreSprites[23 + i * 12], "");
+                pos = GetPositionFromIdx(12+i*12);
+                pos2 = GetPositionFromIdx(23+i*12);
+	            text = (i + 1).ToString();
+                CreateImage(_coreParent, pos, _coreSprites[12 + i * 12], text);
+                CreateImage(_coreParent, pos2, _coreSprites[23 + i * 12], text);
             }
         }
 
-        var grassStartPos = _coreStartPos + Vector2.down * _offset + Vector2.right * _offset;
-        var grassStartIdx = 13;
+        const int grassStartIdx = 13;
         for (var i = 0; i < 10; ++i)
         {
             for (var j = 0; j < 10; ++j)
             {
-                var pos = grassStartPos + Vector2.right * _offset * i + Vector2.down * _offset * j;
-                var sprite = _grassSprites[grassStartIdx + i + j * 12];
+	            var idx = grassStartIdx + i + j * 12;
+	            var pos = GetPositionFromIdx(idx);
+                var sprite = _grassSprites[idx];
                 CreateImage(_grassParent, pos, sprite, "");
             }
         }
     }
+
+	private Vector2 GetPositionFromIdx(int idx)
+	{
+		var x = idx%12;
+		var y = idx/12;
+		return _zeroPos + Vector2.down * _offset * y + Vector2.right * _offset * x;
+	}
 
     private Transform CreateImage(Transform parent, Vector2 pos, Sprite sprite, string text)
     {
@@ -68,4 +94,39 @@ public class GameManager : MonoBehaviour
 
         return g;
     }
+
+	public void PlayerJoin()
+	{
+		var position = 0;
+		var placed = false;
+		if (_players.Count == 0)
+		{
+			position = _playerStartPositions[0];
+			placed = true;
+		}
+		else
+		{
+			foreach (var playerStartPosition in _playerStartPositions)
+			{
+				var taken = _players.Any(player => player.Position == playerStartPosition);
+				if (taken) continue;
+				position = playerStartPosition;
+				placed = true;
+				break;
+			}
+		}
+		if (!placed)
+			Debug.Log("There is no more space for new player");
+		else
+		{
+			var p = Instantiate(_playerPrefab, _playersParent);
+			p.transform.localPosition = GetPositionFromIdx(position);
+
+			var playerController = p.GetComponent<PlayerController>();
+			playerController.Position = position;
+			playerController.Setup();
+
+			_players.Add(playerController);
+		}
+	}
 }
