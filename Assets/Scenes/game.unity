@@ -518,7 +518,7 @@ MonoBehaviour:
   _tailPrefab: {fileID: 224043073465126840, guid: 684576d33edab4c4dae7131424be3765,
     type: 2}
   _startIdx: 16
-  _tickTime: 1
+  _tickTime: 0.2
 --- !u!1 &886823205
 GameObject:
   m_ObjectHideFlags: 0
