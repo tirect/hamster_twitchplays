@@ -100,7 +100,9 @@ public class SnakeController : MonoBehaviour
 
 		var moveLastBody = true;
 		var moveIdxDirection = possibleMoveIdx[Random.Range(0, possibleMoveIdx.Length)];
-		if (!CheckMovePossibility(moveIdxDirection.idx)) return;
+		while(!CheckMovePossibility(moveIdxDirection.idx))
+			moveIdxDirection = possibleMoveIdx[Random.Range(0, possibleMoveIdx.Length)];
+		//if (!CheckMovePossibility(moveIdxDirection.idx)) return;
 		if (!_addBody)
 		{
 			_tail.localPosition = _body[_body.Count - 1].localPosition;

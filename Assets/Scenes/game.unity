@@ -265,6 +265,7 @@ RectTransform:
   - {fileID: 534093557}
   - {fileID: 936134103}
   - {fileID: 886823206}
+  - {fileID: 876088221}
   m_Father: {fileID: 0}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -401,7 +402,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6907964b7ed1cd943be0f594fbb69a7c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _zeroPos: {x: -480, y: 352}
   _coreParent: {fileID: 772040566}
   _corePrefab: {fileID: 224017061435468022, guid: 23349b92c45144c9bbf034c578ba837e,
     type: 2}
@@ -466,6 +466,59 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &876088220
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 876088221}
+  - component: {fileID: 876088222}
+  m_Layer: 0
+  m_Name: Snake
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &876088221
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 876088220}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 134076552}
+  m_RootOrder: 6
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &876088222
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 876088220}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16d788631b281cb42955ddbc93d44a74, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _bodyPrefab: {fileID: 224043073465126840, guid: f35b78eb563a382488bb4b227c15e68d,
+    type: 2}
+  _headPrefab: {fileID: 224043073465126840, guid: 7b8d6aab6945a734fa2a2255f062265d,
+    type: 2}
+  _tailPrefab: {fileID: 224043073465126840, guid: 684576d33edab4c4dae7131424be3765,
+    type: 2}
+  _startIdx: 16
+  _tickTime: 1
 --- !u!1 &886823205
 GameObject:
   m_ObjectHideFlags: 0
