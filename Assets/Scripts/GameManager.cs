@@ -5,8 +5,6 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
-	[SerializeField] private Vector2 _zeroPos;
-	[Space]
 	[SerializeField] private Transform _coreParent;
     [SerializeField] private Transform _corePrefab;
     [Space]
@@ -23,7 +21,6 @@ public class GameManager : MonoBehaviour
     private Sprite[] _grassSprites1;
     private Sprite[] _grassSprites2;
     private Sprite[] _grassSprites3;
-    private const int _offset = 64;
 
 	private List<PlayerController> _players;
 	private int[] _playerStartPositions;
@@ -50,15 +47,15 @@ public class GameManager : MonoBehaviour
     {
         for (var i = 0; i < 12; ++i)
         {
-            var pos = GetPositionFromIdx(i);
-            var pos2 = GetPositionFromIdx(i+12*11);
+            var pos = Utils.GetPositionFromIdx(i);
+            var pos2 = Utils.GetPositionFromIdx(i+12*11);
             var text = i == 0 || i == 11 ? "" : _horizontalLetters[i-1];
             CreateImage(_coreParent, pos, _coreSprites[i], text);
             CreateImage(_coreParent, pos2, _coreSprites[i + 12 * 11], text);
             if (i < 10)
             {
-                pos = GetPositionFromIdx(12+i*12);
-                pos2 = GetPositionFromIdx(23+i*12);
+                pos = Utils.GetPositionFromIdx(12+i*12);
+                pos2 = Utils.GetPositionFromIdx(23+i*12);
 	            text = (i + 1).ToString();
                 CreateImage(_coreParent, pos, _coreSprites[12 + i * 12], text);
                 CreateImage(_coreParent, pos2, _coreSprites[23 + i * 12], text);
@@ -71,19 +68,12 @@ public class GameManager : MonoBehaviour
             for (var j = 0; j < 10; ++j)
             {
 	            var idx = grassStartIdx + i + j * 12;
-	            var pos = GetPositionFromIdx(idx);
+	            var pos = Utils.GetPositionFromIdx(idx);
                 var sprite = _grassSprites[idx];
                 CreateImage(_grassParent, pos, sprite, "");
             }
         }
     }
-
-	private Vector2 GetPositionFromIdx(int idx)
-	{
-		var x = idx%12;
-		var y = idx/12;
-		return _zeroPos + Vector2.down * _offset * y + Vector2.right * _offset * x;
-	}
 
     private Transform CreateImage(Transform parent, Vector2 pos, Sprite sprite, string text)
     {
@@ -120,7 +110,7 @@ public class GameManager : MonoBehaviour
 		else
 		{
 			var p = Instantiate(_playerPrefab, _playersParent);
-			p.transform.localPosition = GetPositionFromIdx(position);
+			p.transform.localPosition = Utils.GetPositionFromIdx(position);
 
 			var playerController = p.GetComponent<PlayerController>();
 			playerController.Position = position;
